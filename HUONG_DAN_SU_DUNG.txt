@@ -1,0 +1,234 @@
+HƯỚNG DẪN CÀI ĐẶT VÀ SỬ DỤNG HỆ THỐNG ĐIỂM DANH TỰ ĐỘNG
+=================================================
+
+I. YÊU CẦU HỆ THỐNG
+------------------
+1. Phần cứng:
+   - Máy tính có webcam hoặc camera USB
+   - RAM tối thiểu 4GB (khuyến nghị 8GB)
+   - Ổ cứng còn trống ít nhất 2GB
+   - CPU hỗ trợ SSE4.2 trở lên (cho PyTorch)
+
+2. Phần mềm:
+   - Python 3.9 64-bit trở lên (QUAN TRỌNG: phải là bản 64-bit)
+   - MySQL Server
+   - Git (nếu clone từ repository)
+
+II. HƯỚNG DẪN CÀI ĐẶT
+--------------------
+1. Cài đặt Python (QUAN TRỌNG - PHẢI LÀM ĐÚNG):
+   a. Gỡ cài đặt Python hiện tại:
+      - Vào Settings > Apps > Apps & features
+      - Tìm và gỡ tất cả các phiên bản Python
+      - Xóa thư mục Python trong:
+        + C:\Users\[username]\AppData\Local\Programs\Python
+        + C:\Program Files\Python*
+        + C:\Program Files (x86)\Python*
+      - Xóa các thư mục pip trong:
+        + C:\Users\[username]\AppData\Local\pip
+   
+   b. Kiểm tra và xóa Python khỏi PATH:
+      - Mở System Properties (Win + R, gõ sysdm.cpl)
+      - Click "Environment Variables"
+      - Trong System variables, tìm Path
+      - Xóa tất cả các đường dẫn có chứa Python hoặc pip
+
+   c. Cài đặt Python 64-bit:
+      - Tải Python 64-bit từ: https://www.python.org/downloads/
+      - QUAN TRỌNG: Chọn đúng bản "Windows x86-64 executable installer"
+      - CHẠY INSTALLER VỚI QUYỀN ADMINISTRATOR
+      - Trong quá trình cài đặt:
+        + ✅ Tick vào "Add Python.exe to PATH"
+        + ✅ Tick vào "Install Python 3.x for all users"
+        + Click "Customize installation"
+        + ✅ Tick tất cả các tùy chọn trong "Optional Features"
+        + ✅ Tick tất cả các tùy chọn trong "Advanced Options"
+        + Installation Directory: C:\Program Files\Python39
+        + Click "Install"
+
+   d. Kiểm tra cài đặt:
+      - Đóng tất cả các cửa sổ Command Prompt/PowerShell
+      - Mở Command Prompt MỚI với quyền Administrator
+      - Kiểm tra Python:
+        ```
+        python --version
+        ```
+        (Phải hiển thị phiên bản Python, ví dụ: Python 3.9.x)
+      
+      - Kiểm tra pip:
+        ```
+        pip --version
+        ```
+        (Phải hiển thị phiên bản pip)
+      
+      - Kiểm tra kiến trúc Python:
+        ```
+        python -c "import platform; print(platform.architecture()[0])"
+        ```
+        (Phải hiển thị: 64bit)
+
+   e. Nếu lệnh python/pip không được nhận diện:
+      - Thêm thủ công vào PATH:
+        + Mở System Properties (Win + R, gõ sysdm.cpl)
+        + Click "Environment Variables"
+        + Trong System variables, tìm Path
+        + Click "New" và thêm:
+          ```
+          C:\Program Files\Python39
+          C:\Program Files\Python39\Scripts
+          ```
+      - Khởi động lại máy tính
+      - Mở Command Prompt mới và thử lại các lệnh kiểm tra
+
+2. Cài đặt MySQL:
+   - Tải MySQL Community Server từ: https://dev.mysql.com/downloads/mysql/
+   - Ghi nhớ mật khẩu root khi cài đặt
+   - Đảm bảo MySQL service đang chạy
+
+3. Cài đặt Visual Studio Build Tools (BẮT BUỘC):
+   - Tải Visual Studio Build Tools 2019:
+     https://visualstudio.microsoft.com/visual-cpp-build-tools/
+   - Chọn "Desktop development with C++"
+   - Trong phần Individual components, chọn:
+     + MSVC v142 - VS 2019 C++ x64/x86 build tools
+     + Windows 10 SDK
+     + C++ CMake tools for Windows
+   - Cài đặt và chờ hoàn tất
+
+4. Cài đặt các thư viện Python:
+   Mở Command Prompt MỚI với quyền Administrator và chạy từng lệnh:
+   ```
+   pip install --upgrade pip
+   pip install mysql-connector-python
+   pip install opencv-python
+   pip install wheel setuptools
+   pip install numpy==1.26.4
+   pip install scipy==1.12.0
+   pip install scikit-learn==1.4.1.post1
+   pip install pillow customtkinter
+   pip install tk pyinstaller openpyxl flask
+   ```
+
+   Cài đặt PyTorch (QUAN TRỌNG):
+   a. Cài đặt phiên bản CPU (Khuyến nghị cho hầu hết người dùng):
+      ```
+      pip install torch==2.1.0+cpu torchvision==0.16.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
+      ```
+
+   b. Nếu máy tính có GPU NVIDIA và muốn sử dụng GPU:
+      - Cài đặt CUDA Toolkit 11.8 từ: https://developer.nvidia.com/cuda-11-8-0-download-archive
+      - Cài đặt cuDNN v8.7.0 cho CUDA 11.x từ: https://developer.nvidia.com/cudnn
+      - Sau đó chạy lệnh:
+        ```
+        pip install torch==2.1.0+cu118 torchvision==0.16.0+cu118 -f https://download.pytorch.org/whl/torch_stable.html
+        ```
+
+   Cài đặt face-recognition và các dependencies:
+   ```
+   pip install cmake
+   pip install dlib
+   pip install face-recognition
+   ```
+
+   Nếu gặp lỗi khi cài dlib, thực hiện các bước sau:
+   1. Cài đặt Visual Studio Build Tools:
+      - Tải Visual Studio Build Tools 2019 từ: https://visualstudio.microsoft.com/visual-cpp-build-tools/
+      - Trong quá trình cài đặt, chọn "Desktop development with C++"
+   
+   2. Sau đó thử cài đặt lại:
+      ```
+      pip install dlib --no-cache-dir
+      pip install face-recognition
+      ```
+
+5. Cài đặt project:
+   a. Tải source code về máy:
+      - Sử dụng Git: git clone [URL của repository]
+      - Hoặc tải file ZIP và giải nén
+
+   b. Cấu hình database:
+      - Mở MySQL và tạo database mới tên "Facial_Recognition"
+      - Cập nhật thông tin kết nối trong file config.json:
+        + db_username: tên đăng nhập MySQL
+        + db_password: mật khẩu MySQL
+        + db_host: địa chỉ host MySQL (mặc định: localhost)
+
+III. HƯỚNG DẪN SỬ DỤNG
+---------------------
+1. Khởi động hệ thống:
+   - Mở Command Prompt/PowerShell trong thư mục project
+   - Chạy lệnh: python GUI.py
+
+2. Đăng nhập hệ thống:
+   Tài khoản mặc định:
+   - Superuser: username = "superuser", password = "superpass"
+   - Admin: username = "admin", password = "adminpass"
+   - Moderator: username = "moderator", password = "modpass"
+   - User: username = "user", password = "userpass"
+
+3. Các chức năng chính:
+
+   a. Quản lý học sinh:
+      - Thêm học sinh mới:
+        + Nhập thông tin cá nhân
+        + Chụp ảnh hoặc tải ảnh lên
+        + Lưu vào hệ thống
+      
+      - Sửa thông tin học sinh:
+        + Chọn học sinh cần sửa
+        + Cập nhật thông tin
+        + Lưu thay đổi
+
+      - Xóa học sinh:
+        + Chọn học sinh cần xóa
+        + Xác nhận xóa
+
+   b. Điểm danh:
+      - Khởi động camera
+      - Chọn lớp cần điểm danh
+      - Hệ thống sẽ tự động nhận diện và điểm danh
+      - Có thể điều chỉnh điểm danh thủ công nếu cần
+
+   c. Báo cáo:
+      - Xuất danh sách điểm danh
+      - Xem thống kê theo lớp
+      - Xuất báo cáo Excel
+
+   d. Cài đặt hệ thống:
+      - Điều chỉnh các thông số camera
+      - Cấu hình xử lý ảnh
+      - Thay đổi ngôn ngữ
+      - Cài đặt thời gian điểm danh
+
+IV. XỬ LÝ SỰ CỐ THƯỜNG GẶP
+-------------------------
+1. Lỗi kết nối database:
+   - Kiểm tra MySQL service đã chạy chưa
+   - Kiểm tra thông tin đăng nhập trong config.json
+   - Đảm bảo database "Facial_Recognition" đã được tạo
+
+2. Lỗi camera:
+   - Kiểm tra camera đã được kết nối
+   - Thử đổi camera_index trong config.json
+   - Kiểm tra quyền truy cập camera
+
+3. Lỗi nhận diện khuôn mặt:
+   - Đảm bảo ánh sáng đủ sáng
+   - Điều chỉnh góc camera
+   - Thử các tùy chọn xử lý ảnh trong Control Panel
+
+V. BẢO MẬT
+---------
+1. Đổi mật khẩu mặc định ngay sau khi cài đặt
+2. Không chia sẻ thông tin đăng nhập
+3. Sao lưu database định kỳ
+4. Cập nhật phần mềm thường xuyên
+
+VI. LIÊN HỆ HỖ TRỢ
+----------------
+Nếu cần hỗ trợ thêm, vui lòng liên hệ:
+- Discord: itztli_herzchen
+- GitHub: https://github.com/Herzchens/Automated-Attendance
+
+--------------------------------
+Cập nhật lần cuối: [Ngày hiện tại] 

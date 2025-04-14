@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hướng Dẫn Sử Dụng Phần Mềm Nhận Diện Khuôn Mặt</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f4f8;
+      color: #333;
+      line-height: 1.6;
+      scroll-behavior: smooth;
+      padding-bottom: 80px;
+    }
+    header {
+      background: #007BFF;
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+    }
+    nav {
+      background: #fff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    nav ul {
+      display: flex;
+      justify-content: center;
+      list-style: none;
+    }
+    nav ul li {
+      margin: 0 15px;
+    }
+    nav ul li a {
+      text-decoration: none;
+      color: #007BFF;
+      font-weight: bold;
+      transition: color 0.3s;
+    }
+    nav ul li a:hover {
+      color: #0056b3;
+    }
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    section {
+      background: #fff;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+    .fade-in-section.visible {
+      opacity: 1;
+      transform: none;
+    }
+    h2 {
+      margin-bottom: 15px;
+      color: #007BFF;
+    }
+    ol, ul {
+      margin-left: 20px;
+      margin-bottom: 10px;
+    }
+    footer {
+      text-align: center;
+      padding: 20px;
+      background: #007BFF;
+      color: #fff;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Hướng Dẫn Sử Dụng Phần Mềm Nhận Diện Khuôn Mặt</h1>
+  </header>
+  <nav>
+    <ul>
+      <li><a href="#gioi-thieu">Giới thiệu</a></li>
+      <li><a href="#cai-dat">Cài đặt & CSDL</a></li>
+      <li><a href="#ket-noi-camera">Kết nối Camera</a></li>
+      <li><a href="#bang-dieu-khien">Bảng điều khiển</a></li>
+      <li><a href="#tinh-nang">Tính năng theo cấp</a></li>
+      <li><a href="#huong-dan-su-dung">Hướng dẫn chi tiết</a></li>
+    </ul>
+  </nav>
+  <main>
+    <section id="gioi-thieu" class="fade-in-section">
+      <h2>Giới thiệu</h2>
+      <p>
+        Phần mềm nhận diện khuôn mặt này được phát triển nhằm tự động hóa việc điểm danh và quản lý học sinh dựa trên công nghệ nhận diện khuôn mặt. Dự án được xây dựng theo hướng dẫn sử dụng của 
+        <a href="https://github.com/Herzchens/Automated-Attendance" target="_blank">Automated Attendance</a>, nhằm tích hợp cơ sở dữ liệu MySQL và giao diện người dùng thân thiện, giúp tối ưu hóa quy trình điểm danh trong môi trường giáo dục.
+      </p>
+      <p>
+        Hệ thống chủ yếu sử dụng webcam mặc định để kết nối, đảm bảo tính đơn giản và hiệu quả khi triển khai.
+      </p>
+    </section>
+    <section id="cai-dat" class="fade-in-section">
+      <h2>Cài đặt & Đăng nhập CSDL</h2>
+      <p>
+        <strong>Bước 1:</strong> Đảm bảo phần mềm và MySQL đã được cài đặt trên hệ thống. Khi chạy phần mềm lần đầu, nếu CSDL chưa được tạo, hệ thống sẽ tự động tạo cơ sở dữ liệu và các bảng cần thiết.
+      </p>
+      <p>
+        <strong>Bước 2:</strong> Nhập thông tin đăng nhập MySQL gồm:
+      </p>
+      <ul>
+        <li>Máy chủ (Host)</li>
+        <li>Tên đăng nhập (Username)</li>
+        <li>Mật khẩu (Password)</li>
+      </ul>
+      <p>
+        Sau khi đăng nhập thành công, nếu bảng <em>Users</em> chưa có dữ liệu, hệ thống sẽ tự tạo các tài khoản mặc định:
+      </p>
+      <ul>
+        <li>SuperUser: <strong>superuser / superpass</strong></li>
+        <li>Admin: <strong>admin / adminpass</strong></li>
+        <li>Moderator: <strong>moderator / modpass</strong></li>
+        <li>User: <strong>user / userpass</strong></li>
+      </ul>
+    </section>
+    <section id="ket-noi-camera" class="fade-in-section">
+      <h2>Kết nối Camera</h2>
+      <p>
+        Hệ thống sử dụng webcam mặc định có sẵn trên máy tính để thực hiện việc nhận diện khuôn mặt. Việc kết nối được thực hiện tự động và không yêu cầu cấu hình thêm các thông số phức tạp.
+      </p>
+    </section>
+    <section id="bang-dieu-khien" class="fade-in-section">
+      <h2>Bảng điều khiển</h2>
+      <p>
+        Sau khi đăng nhập CSDL và thiết lập kết nối camera thành công, bạn sẽ được chuyển đến giao diện bảng điều khiển. Giao diện được thiết kế trực quan với:
+      </p>
+      <ul>
+        <li>Hiệu ứng chuyển đổi mượt mà (animation) và các nút, hộp được bo tròn.</li>
+        <li>Tùy chọn chuyển đổi giữa giao diện Dark và Light.</li>
+        <li>Chức năng đăng xuất và thoát.</li>
+      </ul>
+      <p>
+        Tùy theo vai trò người dùng (SuperUser, Admin, Moderator, User), giao diện sẽ hiển thị các chức năng quản lý khác nhau.
+      </p>
+    </section>
+    <section id="tinh-nang" class="fade-in-section">
+      <h2>Tính năng theo cấp</h2>
+      <h3>SuperUser</h3>
+      <p>
+        Quản lý toàn bộ hệ thống: thêm, sửa, xoá tài khoản người dùng, quản lý học sinh, xuất danh sách và cài đặt hệ thống.
+      </p>
+      <h3>Admin</h3>
+      <p>
+        Quản lý học sinh: thêm, sửa, xoá thông tin học sinh, cập nhật trạng thái điểm danh và thiết lập thời gian hạn chót.
+      </p>
+      <h3>Moderator</h3>
+      <p>
+        Giám sát quá trình điểm danh và xuất dữ liệu báo cáo theo lớp.
+      </p>
+      <h3>User</h3>
+      <p>
+        Chỉ được xem thông tin điểm danh của học sinh được phân công.
+      </p>
+    </section>
+    <section id="huong-dan-su-dung" class="fade-in-section">
+      <h2>Hướng Dẫn Sử Dụng Chi Tiết</h2>
+      <h3>Bước 1: Cài đặt và đăng nhập CSDL</h3>
+      <p>
+        - Khởi chạy phần mềm. Nếu CSDL chưa được tạo, hệ thống sẽ tự động tạo CSDL và các bảng cần thiết.<br>
+        - Nhập thông tin đăng nhập MySQL (Host, Username, Password) và nhấn nút "Đăng nhập".
+      </p>
+      <h3>Bước 2: Đăng nhập vào bảng điều khiển</h3>
+      <p>
+        - Sau khi cấu hình CSDL và kết nối webcam thành công, hệ thống sẽ chuyển bạn đến giao diện bảng điều khiển.<br>
+        - Tại đây, bạn có thể thực hiện các thao tác quản lý theo vai trò của mình.
+      </p>
+      <h3>Bước 3: Quản lý học sinh và điểm danh</h3>
+      <p>
+        - Với vai trò Admin, bạn có thể thêm học sinh bằng cách chọn "Thêm học sinh" và tải ảnh học sinh từ máy tính.<br>
+        - Các thao tác sửa, xoá thông tin học sinh được thực hiện qua các nút chức năng trên danh sách.<br>
+        - Khi điểm danh, hệ thống tự động cập nhật trạng thái điểm danh (đúng giờ, muộn,…) dựa trên thời gian điểm danh và hạn chót.
+      </p>
+      <h3>Bước 4: Xuất dữ liệu và thiết lập hạn chót</h3>
+      <p>
+        - Người quản lý có thể xuất danh sách học sinh ra file CSV để lưu trữ hoặc in báo cáo.<br>
+        - Sử dụng chức năng "Cài đặt hạn chót" để xác định thời gian giới hạn cho việc điểm danh. Học sinh điểm danh sau thời gian này sẽ được đánh dấu là "Muộn".
+      </p>
+    </section>
+  </main>
+  <footer>
+    <p>&copy; 2025 Phần Mềm Nhận Diện Khuôn Mặt. Bản quyền thuộc về hệ thống.</p>
+  </footer>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const sections = document.querySelectorAll('.fade-in-section');
+      const observerOptions = { threshold: 0.15 };
+      const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, observerOptions);
+      sections.forEach(section => observer.observe(section));
+    });
+  </script>
+</body>
+</html>

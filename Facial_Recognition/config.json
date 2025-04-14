@@ -1,0 +1,20 @@
+{
+    "theme": "Dark",
+    "language": "Tiếng Việt",
+    "db_host": "",
+    "db_username": "aXBy",
+    "db_password": "YWJjZEAxMjM0",
+    "camera_type": "Webcam mặc định",
+    "camera_url": "",
+    "camera_types": [
+        "Webcam mặc định",
+        "Camera IP LAN",
+        "Camera WiFi"
+    ],
+    "camera_simple_mode": false,
+    "camera_protocol": "",
+    "camera_user": "",
+    "camera_pass": "",
+    "camera_ip": "",
+    "camera_port": ""
+}
