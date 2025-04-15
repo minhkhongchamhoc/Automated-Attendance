@@ -374,7 +374,7 @@ class UserLoginWindow(tk.Tk):
         self.trans = translations[self.language]
         self.title(self.trans["user_title"])
         self.geometry("600x400")
-        self.resizable(True, True)
+        self.resizable(False, False)
         self.create_widgets()
 
     def create_widgets(self):
