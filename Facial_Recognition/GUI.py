@@ -1,20 +1,14 @@
-import customtkinter as ctk
+import tkinter as tk
+from tkinter import ttk, messagebox
 import sys, json, os, base64, threading
-from tkinter import messagebox
 from DatabaseHooking import connect_db, create_tables, verify_user, create_default_users
 from translator import translations
 import FacialRecognition
-import tkinter as tk
 import ctypes
 
-# Tắt animation để tránh lỗi
-ctk.deactivate_automatic_dpi_awareness()
-ctk.set_appearance_mode("dark")
-ctk.set_default_color_theme("blue")
-
-# Fix DPI Awareness
+# Tắt DPI Awareness
 try:
-    ctypes.windll.shcore.SetProcessDpiAwareness(1)
+    ctypes.windll.shcore.SetProcessDpiAwareness(0)
 except Exception:
     pass
 
@@ -84,28 +78,26 @@ def save_config(theme, language, db_host, db_username, db_password,
         print("Error saving config:", e)
 
 config = load_config()
-ctk.set_appearance_mode(config.get("theme", "Light"))
-ctk.set_default_color_theme("blue")
 
-class CameraConfigWindow(ctk.CTkToplevel):
+class CameraConfigWindow(tk.Toplevel):
     def __init__(self, parent, current_camera_types):
         super().__init__(parent)
         self.title("Chỉnh sửa cấu hình Camera")
         self.geometry("400x300")
         self.parent = parent
-        self.textbox = ctk.CTkTextbox(self, width=350, height=200)
+        self.textbox = tk.Text(self, width=40, height=10)
         self.textbox.pack(pady=10)
         initial_text = "\n".join(current_camera_types)
-        self.textbox.insert("0.0", initial_text)
-        self.button_frame = ctk.CTkFrame(self)
+        self.textbox.insert("1.0", initial_text)
+        self.button_frame = ttk.Frame(self)
         self.button_frame.pack(pady=10)
-        self.save_button = ctk.CTkButton(self.button_frame, text="Lưu", command=self.save)
+        self.save_button = ttk.Button(self.button_frame, text="Lưu", command=self.save)
         self.save_button.grid(row=0, column=0, padx=10)
-        self.cancel_button = ctk.CTkButton(self.button_frame, text="Hủy", command=self.destroy)
+        self.cancel_button = ttk.Button(self.button_frame, text="Hủy", command=self.destroy)
         self.cancel_button.grid(row=0, column=1, padx=10)
 
     def save(self):
-        content = self.textbox.get("0.0", "end").strip()
+        content = self.textbox.get("1.0", "end").strip()
         new_camera_types = [line.strip() for line in content.splitlines() if line.strip()]
         if not new_camera_types:
             messagebox.showerror("Lỗi", "Danh sách loại kết nối không được để trống.")
@@ -116,10 +108,9 @@ class CameraConfigWindow(ctk.CTkToplevel):
             self.parent.combo_camera_type.set(new_camera_types[0])
         self.destroy()
 
-class MySQLLoginWindow(ctk.CTk):
+class MySQLLoginWindow(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.current_mode = config.get("theme", "Light")
         self.language = config.get("language", "Tiếng Việt")
         self.trans = translations[self.language]
         self.title(self.trans["mysql_title"])
@@ -137,7 +128,6 @@ class MySQLLoginWindow(ctk.CTk):
         self.camera_ip = config.get("camera_ip", "")
         self.camera_port = config.get("camera_port", "")
         self.create_widgets()
-        self.create_theme_toggle()
         if config.get("db_host"):
             self.entry_db_host.insert(0, config["db_host"])
         if config.get("db_username"):
@@ -157,97 +147,91 @@ class MySQLLoginWindow(ctk.CTk):
             self.hide_simple_mode()
 
     def create_widgets(self):
-        self.label_title = ctk.CTkLabel(self, text=self.trans["mysql_label"], font=("Arial", 24))
+        self.label_title = ttk.Label(self, text=self.trans["mysql_label"], font=("Arial", 24))
         self.label_title.pack(pady=20)
-        self.frame_form = ctk.CTkFrame(self)
+        self.frame_form = ttk.Frame(self)
         self.frame_form.pack(pady=10, padx=40, fill="both", expand=True)
-        self.label_db_host = ctk.CTkLabel(self.frame_form, text=self.trans["db_host"])
+        self.label_db_host = ttk.Label(self.frame_form, text=self.trans["db_host"])
         self.label_db_host.grid(row=0, column=0, padx=10, pady=10, sticky="e")
-        self.entry_db_host = ctk.CTkEntry(self.frame_form, placeholder_text="localhost")
+        self.entry_db_host = ttk.Entry(self.frame_form)
         self.entry_db_host.grid(row=0, column=1, padx=10, pady=10, sticky="w")
-        self.label_db_username = ctk.CTkLabel(self.frame_form, text=self.trans["db_username"])
+        self.label_db_username = ttk.Label(self.frame_form, text=self.trans["db_username"])
         self.label_db_username.grid(row=1, column=0, padx=10, pady=10, sticky="e")
-        self.entry_db_username = ctk.CTkEntry(self.frame_form)
+        self.entry_db_username = ttk.Entry(self.frame_form)
         self.entry_db_username.grid(row=1, column=1, padx=10, pady=10, sticky="w")
-        self.label_db_password = ctk.CTkLabel(self.frame_form, text=self.trans["db_password"])
+        self.label_db_password = ttk.Label(self.frame_form, text=self.trans["db_password"])
         self.label_db_password.grid(row=2, column=0, padx=10, pady=10, sticky="e")
-        self.entry_db_password = ctk.CTkEntry(self.frame_form, show="*")
+        self.entry_db_password = ttk.Entry(self.frame_form, show="*")
         self.entry_db_password.grid(row=2, column=1, padx=10, pady=10, sticky="w")
-        self.label_language = ctk.CTkLabel(self.frame_form, text=self.trans["language"])
+        self.label_language = ttk.Label(self.frame_form, text=self.trans["language"])
         self.label_language.grid(row=3, column=0, padx=10, pady=10, sticky="e")
-        self.combo_language = ctk.CTkComboBox(self.frame_form, values=["Tiếng Việt", "English"],
-                                               command=self.change_language, state="readonly")
+        self.combo_language = ttk.Combobox(self.frame_form, values=["Tiếng Việt", "English"], state="readonly")
         self.combo_language.set(self.language)
         self.combo_language.grid(row=3, column=1, padx=10, pady=10, sticky="w")
-        self.checkbox_remember = ctk.CTkCheckBox(self.frame_form, text=self.trans["remember"])
+        self.checkbox_remember = ttk.Checkbutton(self.frame_form, text=self.trans["remember"])
         self.checkbox_remember.grid(row=4, column=1, padx=10, pady=10, sticky="w")
-        self.frame_camera = ctk.CTkFrame(self)
+        self.remember_var = tk.BooleanVar()
+        self.checkbox_remember.configure(variable=self.remember_var)
+        self.frame_camera = ttk.Frame(self)
         self.frame_camera.pack(pady=10, padx=40, fill="both", expand=True)
-        self.label_camera_header = ctk.CTkLabel(self.frame_camera, text=self.trans["camera_header"],
-                                                font=("Arial", 20, "bold"))
+        self.label_camera_header = ttk.Label(self.frame_camera, text=self.trans["camera_header"], font=("Arial", 20, "bold"))
         self.label_camera_header.grid(row=0, column=0, columnspan=3, pady=10)
-        self.label_camera_type = ctk.CTkLabel(self.frame_camera, text=self.trans["camera_type_label"])
+        self.label_camera_type = ttk.Label(self.frame_camera, text=self.trans["camera_type_label"])
         self.label_camera_type.grid(row=1, column=0, padx=10, pady=10, sticky="e")
-        self.combo_camera_type = ctk.CTkComboBox(self.frame_camera, values=self.camera_types,
-                                                 command=self.on_camera_type_change, state="readonly")
+        self.combo_camera_type = ttk.Combobox(self.frame_camera, values=self.camera_types, state="readonly")
         self.combo_camera_type.grid(row=1, column=1, padx=10, pady=10, sticky="w")
-        self.button_camera_config = ctk.CTkButton(self.frame_camera, text="⚙️", width=30,
-                                                  command=self.open_camera_config)
+        self.button_camera_config = ttk.Button(self.frame_camera, text="⚙️", width=3, command=self.open_camera_config)
         self.button_camera_config.grid(row=1, column=2, padx=10, pady=10)
-        self.label_camera_url = ctk.CTkLabel(self.frame_camera, text=self.trans["camera_url_label"])
+        self.label_camera_url = ttk.Label(self.frame_camera, text=self.trans["camera_url_label"])
         self.label_camera_url.grid(row=2, column=0, padx=10, pady=10, sticky="e")
-        self.entry_camera_url = ctk.CTkEntry(self.frame_camera)
+        self.entry_camera_url = ttk.Entry(self.frame_camera)
         self.entry_camera_url.grid(row=2, column=1, padx=10, pady=10, sticky="w")
-        self.switch_simple_mode = ctk.CTkCheckBox(self.frame_camera, text=self.trans["simple_mode"],
-                                                  command=self.toggle_simple_mode)
+        self.switch_simple_mode = ttk.Checkbutton(self.frame_camera, text=self.trans["simple_mode"], command=self.toggle_simple_mode)
         self.switch_simple_mode.grid(row=3, column=0, padx=10, pady=10, sticky="w")
-        self.frame_simple = ctk.CTkFrame(self.frame_camera)
+        self.frame_simple = ttk.Frame(self.frame_camera)
         self.frame_simple.grid(row=4, column=0, columnspan=3, padx=10, pady=10, sticky="nsew")
-        self.label_connection_mode = ctk.CTkLabel(self.frame_simple, text=self.trans["connection_mode"])
+        self.label_connection_mode = ttk.Label(self.frame_simple, text=self.trans["connection_mode"])
         self.label_connection_mode.grid(row=0, column=0, padx=5, pady=5, sticky="e")
         self.protocol_options = ["RTSP", "HTTP", "HTTPS", "ONVIF", "RTP", "HLS", "WebRTC"]
-        self.optionmenu_protocol = ctk.CTkComboBox(self.frame_simple, values=self.protocol_options)
+        self.optionmenu_protocol = ttk.Combobox(self.frame_simple, values=self.protocol_options, state="readonly")
         self.optionmenu_protocol.set(self.selected_protocol)
         self.optionmenu_protocol.grid(row=0, column=1, padx=5, pady=5, sticky="w")
-        self.label_camera_user = ctk.CTkLabel(self.frame_simple, text=self.trans["camera_username_label"])
+        self.label_camera_user = ttk.Label(self.frame_simple, text=self.trans["camera_username_label"])
         self.label_camera_user.grid(row=1, column=0, padx=5, pady=5, sticky="e")
-        self.entry_camera_user = ctk.CTkEntry(self.frame_simple)
+        self.entry_camera_user = ttk.Entry(self.frame_simple)
         self.entry_camera_user.grid(row=1, column=1, padx=5, pady=5, sticky="w")
-        self.label_camera_pass = ctk.CTkLabel(self.frame_simple, text=self.trans["camera_password_label"])
+        self.label_camera_pass = ttk.Label(self.frame_simple, text=self.trans["camera_password_label"])
         self.label_camera_pass.grid(row=2, column=0, padx=5, pady=5, sticky="e")
-        self.entry_camera_pass = ctk.CTkEntry(self.frame_simple, show="*")
+        self.entry_camera_pass = ttk.Entry(self.frame_simple, show="*")
         self.entry_camera_pass.grid(row=2, column=1, padx=5, pady=5, sticky="w")
-        self.label_camera_ip = ctk.CTkLabel(self.frame_simple, text=self.trans["camera_ip_label"])
+        self.label_camera_ip = ttk.Label(self.frame_simple, text=self.trans["camera_ip_label"])
         self.label_camera_ip.grid(row=3, column=0, padx=5, pady=5, sticky="e")
-        self.entry_camera_ip = ctk.CTkEntry(self.frame_simple)
+        self.entry_camera_ip = ttk.Entry(self.frame_simple)
         self.entry_camera_ip.grid(row=3, column=1, padx=5, pady=5, sticky="w")
-        self.label_camera_port = ctk.CTkLabel(self.frame_simple, text=self.trans["camera_port_label"])
+        self.label_camera_port = ttk.Label(self.frame_simple, text=self.trans["camera_port_label"])
         self.label_camera_port.grid(row=4, column=0, padx=5, pady=5, sticky="e")
-        self.entry_camera_port = ctk.CTkEntry(self.frame_simple)
+        self.entry_camera_port = ttk.Entry(self.frame_simple)
         self.entry_camera_port.grid(row=4, column=1, padx=5, pady=5, sticky="w")
-        self.button_generate_link = ctk.CTkButton(self.frame_simple, text=self.trans["generate_link"],
-                                                  command=self.generate_camera_url)
+        self.button_generate_link = ttk.Button(self.frame_simple, text=self.trans["generate_link"], command=self.generate_camera_url)
         self.button_generate_link.grid(row=5, column=0, columnspan=2, padx=5, pady=10)
         self.entry_camera_user.insert(0, self.camera_user)
         self.entry_camera_pass.insert(0, self.camera_pass)
         self.entry_camera_ip.insert(0, self.camera_ip)
         self.entry_camera_port.insert(0, self.camera_port)
-        self.frame_buttons = ctk.CTkFrame(self)
+        self.frame_buttons = ttk.Frame(self)
         self.frame_buttons.pack(pady=10, padx=40, fill="x")
         self.frame_buttons.grid_columnconfigure(0, weight=1)
         self.frame_buttons.grid_columnconfigure(1, weight=1)
-        self.button_login = ctk.CTkButton(self.frame_buttons, text=self.trans["login"],
-                                          command=self.handle_login, width=200, height=40)
+        self.button_login = ttk.Button(self.frame_buttons, text=self.trans["login"], command=self.handle_login)
         self.button_login.grid(row=0, column=0, padx=20, pady=10)
-        self.button_exit = ctk.CTkButton(self.frame_buttons, text=self.trans["exit"],
-                                         command=self.exit_app, width=200, height=40)
+        self.button_exit = ttk.Button(self.frame_buttons, text=self.trans["exit"], command=self.exit_app)
         self.button_exit.grid(row=0, column=1, padx=20, pady=10)
 
     def open_camera_config(self):
         CameraConfigWindow(self, self.camera_types)
 
-    def on_camera_type_change(self, value):
-        if value in ["Webcam mặc định", "Default Webcam"]:
+    def on_camera_type_change(self, event):
+        if self.combo_camera_type.get() in ["Webcam mặc định", "Default Webcam"]:
             self.entry_camera_url.delete(0, "end")
             self.entry_camera_url.configure(state="disabled")
         else:
@@ -291,14 +275,8 @@ class MySQLLoginWindow(ctk.CTk):
         self.entry_camera_url.delete(0, "end")
         self.entry_camera_url.insert(0, link)
 
-    def create_theme_toggle(self):
-        button_text = self.trans["toggle_light"] if self.current_mode == "Dark" else self.trans["toggle_dark"]
-        self.toggle_button = ctk.CTkButton(self, text=button_text, width=40, height=40, corner_radius=8,
-                                           command=self.toggle_theme)
-        self.toggle_button.place(relx=0.98, rely=0.02, anchor="ne")
-
-    def change_language(self, new_lang):
-        self.language = new_lang
+    def change_language(self, event):
+        self.language = self.combo_language.get()
         self.trans = translations[self.language]
         self.title(self.trans["mysql_title"])
         self.label_title.configure(text=self.trans["mysql_label"])
@@ -308,8 +286,6 @@ class MySQLLoginWindow(ctk.CTk):
         self.label_language.configure(text=self.trans["language"])
         self.button_login.configure(text=self.trans["login"])
         self.button_exit.configure(text=self.trans["exit"])
-        button_text = self.trans["toggle_light"] if self.current_mode == "Dark" else self.trans["toggle_dark"]
-        self.toggle_button.configure(text=button_text)
         self.label_camera_header.configure(text=self.trans["camera_header"])
         self.label_camera_type.configure(text=self.trans["camera_type_label"])
         self.label_camera_url.configure(text=self.trans["camera_url_label"])
@@ -323,17 +299,7 @@ class MySQLLoginWindow(ctk.CTk):
         self.combo_camera_type.configure(values=self.camera_types)
         if self.combo_camera_type.get() not in self.camera_types:
             self.combo_camera_type.set(self.camera_types[0])
-        self.on_camera_type_change(self.combo_camera_type.get())
-
-    def toggle_theme(self):
-        if self.current_mode == "Light":
-            ctk.set_appearance_mode("Dark")
-            self.current_mode = "Dark"
-            self.toggle_button.configure(text=self.trans["toggle_light"])
-        else:
-            ctk.set_appearance_mode("Light")
-            self.current_mode = "Light"
-            self.toggle_button.configure(text=self.trans["toggle_dark"])
+        self.on_camera_type_change(None)
 
     def handle_login(self):
         db_host = self.entry_db_host.get().strip()
@@ -364,9 +330,9 @@ class MySQLLoginWindow(ctk.CTk):
         self.camera_pass = self.entry_camera_pass.get().strip()
         self.camera_ip = self.entry_camera_ip.get().strip()
         self.camera_port = self.entry_camera_port.get().strip()
-        if self.checkbox_remember.get():
+        if self.remember_var.get():
             save_config(
-                self.current_mode, language, db_host, db_username, db_password,
+                "Light", language, db_host, db_username, db_password,
                 camera_type, camera_url, self.camera_types,
                 camera_simple_mode=self.simple_mode,
                 camera_protocol=self.selected_protocol,
@@ -377,7 +343,7 @@ class MySQLLoginWindow(ctk.CTk):
             )
         else:
             save_config(
-                self.current_mode, language, "", "", "",
+                "Light", language, "", "", "",
                 camera_type, camera_url, self.camera_types,
                 camera_simple_mode=self.simple_mode,
                 camera_protocol=self.selected_protocol,
@@ -391,7 +357,7 @@ class MySQLLoginWindow(ctk.CTk):
         open_user_login_window(cnx, cursor, language)
 
     def exit_app(self):
-        save_config(self.current_mode, self.language, self.entry_db_host.get().strip(),
+        save_config("Light", self.language, self.entry_db_host.get().strip(),
                     self.entry_db_username.get().strip(), self.entry_db_password.get().strip(),
                     self.combo_camera_type.get().strip(), self.entry_camera_url.get().strip(), self.camera_types,
                     camera_simple_mode=self.simple_mode,
@@ -403,14 +369,13 @@ class MySQLLoginWindow(ctk.CTk):
         self.destroy()
         sys.exit(0)
 
-class UserLoginWindow(ctk.CTk):
+class UserLoginWindow(tk.Tk):
     def __init__(self, cnx, cursor, language):
         super().__init__()
         self.cnx = cnx
         self.cursor = cursor
         self.language = language
         self.trans = translations[self.language]
-        self.current_mode = "Light"
         self.title(self.trans["user_title"])
         self.geometry("1200x800")
         try:
@@ -419,54 +384,34 @@ class UserLoginWindow(ctk.CTk):
             pass
         self.resizable(True, True)
         self.create_widgets()
-        self.create_theme_toggle()
 
     def create_widgets(self):
-        self.label_title = ctk.CTkLabel(self, text=self.trans["user_title"], font=("Arial", 24))
+        self.label_title = ttk.Label(self, text=self.trans["user_title"], font=("Arial", 24))
         self.label_title.pack(pady=20)
-        self.frame_form = ctk.CTkFrame(self)
+        self.frame_form = ttk.Frame(self)
         self.frame_form.pack(pady=10, padx=40, fill="both", expand=True)
-        self.label_username = ctk.CTkLabel(self.frame_form, text=self.trans["username"])
+        self.label_username = ttk.Label(self.frame_form, text=self.trans["username"])
         self.label_username.grid(row=0, column=0, padx=10, pady=10, sticky="e")
-        self.entry_username = ctk.CTkEntry(self.frame_form)
+        self.entry_username = ttk.Entry(self.frame_form)
         self.entry_username.grid(row=0, column=1, padx=10, pady=10, sticky="w")
-        self.label_password = ctk.CTkLabel(self.frame_form, text=self.trans["password"])
+        self.label_password = ttk.Label(self.frame_form, text=self.trans["password"])
         self.label_password.grid(row=1, column=0, padx=10, pady=10, sticky="e")
-        self.entry_password = ctk.CTkEntry(self.frame_form, show="*")
+        self.entry_password = ttk.Entry(self.frame_form, show="*")
         self.entry_password.grid(row=1, column=1, padx=10, pady=10, sticky="w")
-        self.frame_buttons = ctk.CTkFrame(self)
+        self.frame_buttons = ttk.Frame(self)
         self.frame_buttons.pack(pady=10, padx=40, fill="x")
         self.frame_buttons.grid_columnconfigure(0, weight=1)
         self.frame_buttons.grid_columnconfigure(1, weight=1)
         self.frame_buttons.grid_columnconfigure(2, weight=1)
-        self.button_login = ctk.CTkButton(self.frame_buttons, text=self.trans["login"],
-                                          command=self.handle_user_login,
-                                          width=200, height=40)
+        self.button_login = ttk.Button(self.frame_buttons, text=self.trans["login"],
+                                      command=self.handle_user_login)
         self.button_login.grid(row=0, column=0, padx=20, pady=10)
-        self.button_back = ctk.CTkButton(self.frame_buttons, text=self.trans["back"],
-                                         command=self.go_back,
-                                         width=200, height=40)
+        self.button_back = ttk.Button(self.frame_buttons, text=self.trans["back"],
+                                     command=self.go_back)
         self.button_back.grid(row=0, column=1, padx=20, pady=10)
-        self.button_attendance = ctk.CTkButton(self.frame_buttons, text=self.trans["attendance"],
-                                               command=self.open_attendance,
-                                               width=200, height=40)
+        self.button_attendance = ttk.Button(self.frame_buttons, text=self.trans["attendance"],
+                                          command=self.open_attendance)
         self.button_attendance.grid(row=0, column=2, padx=20, pady=10)
-
-    def create_theme_toggle(self):
-        self.toggle_button = ctk.CTkButton(self, text=self.trans["toggle_dark"],
-                                           width=40, height=40, corner_radius=8,
-                                           command=self.toggle_theme)
-        self.toggle_button.place(relx=0.98, rely=0.02, anchor="ne")
-
-    def toggle_theme(self):
-        if self.current_mode == "Light":
-            ctk.set_appearance_mode("Dark")
-            self.current_mode = "Dark"
-            self.toggle_button.configure(text=self.trans["toggle_light"])
-        else:
-            ctk.set_appearance_mode("Light")
-            self.current_mode = "Light"
-            self.toggle_button.configure(text=self.trans["toggle_dark"])
 
     def handle_user_login(self):
         user_username = self.entry_username.get().strip()
@@ -496,7 +441,6 @@ class UserLoginWindow(ctk.CTk):
             camera_type = config_data.get("camera_type", "Webcam mặc định")
             camera_url = config_data.get("camera_url", "")
             camera_source = 0 if camera_type in ["Webcam mặc định", "Default Webcam"] else camera_url
-            # Thay vì self.destroy(), mở cửa sổ AttendanceWindow độc lập
             AttendanceWindow(self.cnx, self.cursor, camera_source)
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể mở chức năng điểm danh:\n{e}")
@@ -511,28 +455,20 @@ class UserLoginWindow(ctk.CTk):
             pass
         win.mainloop()
 
-    def exit_app(self):
-        save_config(self.current_mode, self.language, "", "", "",
-                    "", "", [])
-        self.destroy()
-        sys.exit(0)
-
-class AttendanceWindow(ctk.CTkToplevel):
+class AttendanceWindow(tk.Toplevel):
     def __init__(self, cnx, cursor, camera_source):
         super().__init__()
         self.cnx = cnx
         self.cursor = cursor
         self.camera_source = camera_source
         self.title("Giao diện điểm danh")
-        self.geometry("400x150")  # Giảm kích thước cửa sổ vì đã bớt các tùy chọn
+        self.geometry("400x150")
         self.create_widgets()
-        # Bắt đầu luồng điểm danh
         self.attendance_thread = threading.Thread(target=self.run_attendance, daemon=True)
         self.attendance_thread.start()
 
     def create_widgets(self):
-        # Chỉ giữ lại nút đóng điểm danh
-        self.button_close = ctk.CTkButton(self, text="Đóng điểm danh", command=self.close_attendance)
+        self.button_close = ttk.Button(self, text="Đóng điểm danh", command=self.close_attendance)
         self.button_close.pack(pady=50)
 
     def run_attendance(self):

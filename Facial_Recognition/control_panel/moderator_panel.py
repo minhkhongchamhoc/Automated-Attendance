@@ -17,7 +17,6 @@ class ModeratorControlPanel(ctk.CTk):
         self.cursor = cursor
         self.language = language
         self.trans = translations[self.language]
-        self.current_mode = "Light"
         self.title(self.trans["control_title"] + " - Moderator")
         self.geometry("1200x800")
         try:
@@ -26,22 +25,55 @@ class ModeratorControlPanel(ctk.CTk):
             pass
         self.resizable(True, True)
         self.create_widgets()
-        self.create_theme_toggle()
-        self.load_all_students()
+        self.fetch_data()
 
     def create_widgets(self):
         greeting = f"{self.trans['welcome']} {self.user_info[1]} ({self.user_info[2]})"
         self.label_greeting = ctk.CTkLabel(self, text=greeting, font=("Arial", 24))
         self.label_greeting.pack(pady=20)
 
-        # Khung bảng duy nhất (không dùng Tab View)
+        # Tools Bar
+        self.frame_controls = ctk.CTkFrame(self)
+        self.frame_controls.pack(pady=10, padx=40, fill="x")
+        self.button_add = ctk.CTkButton(
+            self.frame_controls,
+            text=self.trans["add_student"],
+            command=lambda: add_student_ui(self, self.cnx, self.cursor, self.language, on_success_callback=self.fetch_data)
+        )
+        self.button_add.grid(row=0, column=0, padx=10, pady=10)
+        self.button_delete = ctk.CTkButton(
+            self.frame_controls,
+            text=self.trans["delete_student"],
+            command=self.delete_student
+        )
+        self.button_delete.grid(row=0, column=1, padx=10, pady=10)
+        self.button_edit = ctk.CTkButton(
+            self.frame_controls,
+            text=self.trans["edit_student"],
+            command=self.edit_student
+        )
+        self.button_edit.grid(row=0, column=2, padx=10, pady=10)
+        self.button_batch_add = ctk.CTkButton(
+            self.frame_controls,
+            text=self.trans.get("batch_add", "Thêm hàng loạt"),
+            command=lambda: add_students_batch_ui(self, self.cnx, self.cursor, self.language, on_success_callback=self.fetch_data)
+        )
+        self.button_batch_add.grid(row=0, column=3, padx=10, pady=10)
+        self.button_cutoff = ctk.CTkButton(
+            self.frame_controls,
+            text=self.trans["set_cutoff"],
+            command=lambda: open_cutoff_ui(self)
+        )
+        self.button_cutoff.grid(row=0, column=4, padx=10, pady=10)
+
+        # Table of Students
         self.table_frame = ctk.CTkFrame(self)
         self.table_frame.pack(pady=10, padx=40, fill="both", expand=True)
         columns = [self.trans["col_index"], self.trans["col_name"], "Lớp", self.trans["col_attendance"]]
         self.custom_table = CustomTable(self.table_frame, columns=columns, corner_radius=8)
         self.custom_table.pack(fill="both", expand=True)
 
-        # Khung tìm kiếm
+        # Search Bar
         self.search_frame = ctk.CTkFrame(self)
         self.search_frame.pack(pady=10)
         self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text=self.trans["search"])
@@ -49,45 +81,33 @@ class ModeratorControlPanel(ctk.CTk):
         self.search_button = ctk.CTkButton(self.search_frame, text=self.trans["search"], command=self.search_student)
         self.search_button.pack(side="left", padx=10)
 
-        # Khung các nút điều khiển
+        # Bottom Buttons
         self.frame_buttons = ctk.CTkFrame(self)
-        self.frame_buttons.pack(pady=10)
+        self.frame_buttons.pack(pady=10, padx=40, fill="x")
+        self.frame_buttons.grid_columnconfigure(0, weight=1)
+        self.frame_buttons.grid_columnconfigure(1, weight=1)
+        self.frame_buttons.grid_columnconfigure(2, weight=1)
         self.button_export = ctk.CTkButton(
-            self.frame_buttons, text=self.trans["export"], width=150,
+            self.frame_buttons,
+            text=self.trans["export"],
             command=lambda: export_students_list(self.cursor, self.language)
         )
         self.button_export.grid(row=0, column=0, padx=20, pady=10)
-        self.button_cutoff = ctk.CTkButton(
-            self.frame_buttons, text=self.trans["set_cutoff"], width=150,
-            command=lambda: CutoffTimeWindowGMT(self, self.cnx, self.cursor, self.language)
-        )
-        self.button_cutoff.grid(row=0, column=1, padx=20, pady=10)
         self.button_logout = ctk.CTkButton(
-            self.frame_buttons, text=self.trans["logout"], width=150,
+            self.frame_buttons,
+            text=self.trans["logout"],
             command=self.logout
         )
-        self.button_logout.grid(row=0, column=2, padx=20, pady=10)
+        self.button_logout.grid(row=0, column=1, padx=20, pady=10)
         self.button_quit = ctk.CTkButton(
-            self.frame_buttons, text=self.trans["quit"], width=150,
+            self.frame_buttons,
+            text=self.trans["quit"],
             command=self.quit_app
         )
-        self.button_quit.grid(row=0, column=3, padx=20, pady=10)
+        self.button_quit.grid(row=0, column=2, padx=20, pady=10)
 
-    def create_theme_toggle(self):
-        btn_text = self.trans["toggle_light"] if self.current_mode == "Dark" else self.trans["toggle_dark"]
-        self.toggle_button = ctk.CTkButton(self, text=btn_text, width=40, height=40, corner_radius=8,
-                                           command=self.toggle_theme)
-        self.toggle_button.place(relx=0.98, rely=0.02, anchor="ne")
-
-    def toggle_theme(self):
-        if self.current_mode == "Light":
-            ctk.set_appearance_mode("Dark")
-            self.current_mode = "Dark"
-            self.toggle_button.configure(text=self.trans["toggle_light"])
-        else:
-            ctk.set_appearance_mode("Light")
-            self.current_mode = "Light"
-            self.toggle_button.configure(text=self.trans["toggle_dark"])
+    def fetch_data(self):
+        self.load_all_students()
 
     def load_all_students(self):
         query = "SELECT id, HoVaTen, Lop, DiemDanhStatus, ThoiGianDiemDanh FROM Students ORDER BY id"
