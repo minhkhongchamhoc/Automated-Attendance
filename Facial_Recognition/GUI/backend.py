@@ -65,18 +65,18 @@ def login():
     remember = data.get('remember', False)
 
     if not username or not password:
-        return jsonify(success=False, message="❌ Vui lòng nhập tên đăng nhập và mật khẩu.")
+        return jsonify(success=False, message=" Vui lòng nhập tên đăng nhập và mật khẩu.")
 
     cnx, cursor = get_db_connection()
     if cnx is None:
-        return jsonify(success=False, message="❌ Không thể kết nối CSDL.")
+        return jsonify(success=False, message=" Không thể kết nối CSDL.")
 
     create_tables(cursor)
     create_default_users(cursor, cnx)
 
     user_info = verify_user(cursor, username, password)
     if user_info is None:
-        return jsonify(success=False, message="❌ Tên đăng nhập hoặc mật khẩu không hợp lệ.")
+        return jsonify(success=False, message=" Tên đăng nhập hoặc mật khẩu không hợp lệ.")
 
     try:
         role = user_info[2]
