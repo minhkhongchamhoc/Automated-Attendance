@@ -114,11 +114,7 @@ class MySQLLoginWindow(tk.Tk):
         self.language = config.get("language", "Tiếng Việt")
         self.trans = translations[self.language]
         self.title(self.trans["mysql_title"])
-        self.geometry("1200x800")
-        try:
-            self.state("zoomed")
-        except Exception:
-            pass
+        self.geometry("800x600")
         self.resizable(True, True)
         self.camera_types = config.get("camera_types", ["Webcam mặc định", "Camera IP LAN", "Camera WiFi"])
         self.simple_mode = config.get("camera_simple_mode", False)
@@ -377,19 +373,15 @@ class UserLoginWindow(tk.Tk):
         self.language = language
         self.trans = translations[self.language]
         self.title(self.trans["user_title"])
-        self.geometry("1200x800")
-        try:
-            self.state("zoomed")
-        except Exception:
-            pass
+        self.geometry("600x400")
         self.resizable(True, True)
         self.create_widgets()
 
     def create_widgets(self):
-        self.label_title = ttk.Label(self, text=self.trans["user_title"], font=("Arial", 24))
-        self.label_title.pack(pady=20)
+        self.label_title = ttk.Label(self, text=self.trans["user_title"], font=("Arial", 20))
+        self.label_title.pack(pady=10)
         self.frame_form = ttk.Frame(self)
-        self.frame_form.pack(pady=10, padx=40, fill="both", expand=True)
+        self.frame_form.pack(pady=5, padx=20, fill="both", expand=True)
         self.label_username = ttk.Label(self.frame_form, text=self.trans["username"])
         self.label_username.grid(row=0, column=0, padx=10, pady=10, sticky="e")
         self.entry_username = ttk.Entry(self.frame_form)
@@ -449,10 +441,6 @@ class UserLoginWindow(tk.Tk):
         self.destroy()
         from GUI import MySQLLoginWindow
         win = MySQLLoginWindow()
-        try:
-            win.state("zoomed")
-        except Exception:
-            pass
         win.mainloop()
 
 class AttendanceWindow(tk.Toplevel):
@@ -462,14 +450,14 @@ class AttendanceWindow(tk.Toplevel):
         self.cursor = cursor
         self.camera_source = camera_source
         self.title("Giao diện điểm danh")
-        self.geometry("400x150")
+        self.geometry("300x100")
         self.create_widgets()
         self.attendance_thread = threading.Thread(target=self.run_attendance, daemon=True)
         self.attendance_thread.start()
 
     def create_widgets(self):
         self.button_close = ttk.Button(self, text="Đóng điểm danh", command=self.close_attendance)
-        self.button_close.pack(pady=50)
+        self.button_close.pack(pady=20)
 
     def run_attendance(self):
         try:
@@ -482,10 +470,6 @@ class AttendanceWindow(tk.Toplevel):
 
 def main():
     app = MySQLLoginWindow()
-    try:
-        app.state("zoomed")
-    except Exception:
-        pass
     app.mainloop()
 
 if __name__ == "__main__":
