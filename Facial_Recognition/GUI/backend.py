@@ -86,12 +86,8 @@ def login():
 
     role_lower = role.lower() if role else "undefined"
 
-    if role_lower == "superuser":
-        redirect_url = "/panel/superuser_panel.html"
-    elif role_lower == "admin":
+    if role_lower == "admin":
         redirect_url = "/panel/admin_panel.html"
-    elif role_lower == "moderator":
-        redirect_url = "/panel/moderator_panel.html"
     else:
         redirect_url = "/panel/user_panel.html"
 
