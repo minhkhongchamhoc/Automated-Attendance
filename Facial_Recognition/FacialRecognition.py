@@ -8,6 +8,7 @@ import face_recognition
 import numpy as np
 from sklearn import neighbors
 from DatabaseHooking import connect_db
+from datetime import datetime, date
 
 with open("config.json", "r", encoding="utf-8") as f:
     config = json.load(f)
@@ -73,13 +74,51 @@ def train_from_db(cursor, model_save_path=None, n_neighbors=None, knn_algo='ball
     
     return knn_clf
 
+def reset_attendance_status(cursor, cnx):
+    """Reset trạng thái điểm danh vào đầu mỗi ngày mới"""
+    try:
+        # Lấy ngày hiện tại
+        today = date.today()
+        
+        # Kiểm tra xem đã reset cho ngày hôm nay chưa
+        cursor.execute("SELECT MAX(ThoiGianDiemDanh) FROM Students")
+        last_reset = cursor.fetchone()[0]
+        
+        if last_reset is None or last_reset.date() < today:
+            print(f"Đang reset trạng thái điểm danh cho ngày mới {today}...")
+            cursor.execute("""
+                UPDATE Students 
+                SET DiemDanhStatus = '❌',
+                    ThoiGianDiemDanh = NULL
+            """)
+            cnx.commit()
+            print("Đã reset trạng thái điểm danh thành công!")
+    except Exception as e:
+        print(f"Lỗi khi reset trạng thái điểm danh: {str(e)}")
+
 def face_loop(cnx, cursor, camera_source=0):
     cap = None
     try:
+        # Reset trạng thái điểm danh trước khi bắt đầu
+        reset_attendance_status(cursor, cnx)
+        
+        print(f"Đang thử mở camera với source {camera_source}...")
         cap = cv2.VideoCapture(camera_source)
         if not cap.isOpened():
+            print("Lỗi: Không thể mở camera. Vui lòng kiểm tra:")
+            print("1. Camera có được kết nối không?")
+            print("2. Camera có đang được sử dụng bởi ứng dụng khác không?")
+            print("3. Bạn có quyền truy cập camera không?")
             raise Exception("Không thể mở camera")
             
+        # Kiểm tra xem camera có hoạt động không
+        ret, frame = cap.read()
+        if not ret:
+            print("Lỗi: Không thể đọc frame từ camera")
+            raise Exception("Camera không hoạt động")
+            
+        print("Camera đã được khởi tạo thành công!")
+        
         # Khởi tạo model
         knn_model_path = "trained_knn_model.clf"
         if not os.path.exists(knn_model_path):
@@ -127,7 +166,9 @@ def face_loop(cnx, cursor, camera_source=0):
                                     WHERE HoVaTen = %s
                                 """, (name,))
                                 cnx.commit()
-                                print(f"Đã điểm danh thành công: {name}")
+                                cursor.execute("SELECT ThoiGianDiemDanh FROM Students WHERE HoVaTen = %s", (name,))
+                                time = cursor.fetchone()[0]
+                                print(f"Đã điểm danh thành công: {name} vào lúc {time}")
                 
                 # Giảm giá trị đếm cho những người không xuất hiện
                 for name in list(attendance_buffer.keys()):
