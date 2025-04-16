@@ -198,6 +198,22 @@ class AdminControlPanel(ctk.CTk):
             except Exception as e:
                 messagebox.showerror("Error", f"Lỗi xoá học sinh:\n{e}")
 
+    def edit_student(self):
+        if self.custom_table.selected_row_index is None:
+            messagebox.showerror("Error", "Vui lòng chọn học sinh cần chỉnh sửa.")
+            return
+        index = self.custom_table.selected_row_index - 1
+        try:
+            student = self.students_raw_data[index]
+        except IndexError:
+            messagebox.showerror("Error", "Lỗi chọn học sinh.")
+            return
+        try:
+            edit_student_ui(self, self.cnx, self.cursor, self.language, student,
+                          on_success_callback=self.fetch_data)
+        except Exception as e:
+            messagebox.showerror("Error", f"Lỗi chỉnh sửa học sinh:\n{e}")
+
     def logout(self):
         self.destroy()
 
